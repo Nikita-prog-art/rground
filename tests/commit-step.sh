@@ -86,7 +86,7 @@ if [[ "$stage_all" -eq 1 ]]; then
 elif [[ "${#paths[@]}" -gt 0 ]]; then
   git add -- "${paths[@]}"
 else
-  default_paths=(.cargo Cargo.lock Cargo.toml README.md assets docs src tests)
+  default_paths=(.cargo .gitignore Cargo.lock Cargo.toml README.md assets docs src tests)
   existing_paths=()
   for path in "${default_paths[@]}"; do
     if [[ -e "$path" ]]; then
