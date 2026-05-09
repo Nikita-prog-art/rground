@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::{player::components::Player, world::map::TileMap};
+use crate::game::{ACTOR_COLLISION_HALF_EXTENT, player::components::Player, world::map::TileMap};
 
 use super::components::{ActorKind, MoveIntent, WanderSeed};
 
@@ -66,10 +66,9 @@ pub fn mob_motion_system(
         };
 
         let direction = intent.direction.normalize_or_zero();
-        let next = transform.translation + (direction * speed * time.delta_secs()).extend(0.0);
-        if tile_map.is_walkable(tile_map.world_to_tile(next)) {
-            transform.translation = next;
-        }
+        let delta = direction * speed * time.delta_secs();
+        transform.translation =
+            tile_map.slide_position(transform.translation, delta, ACTOR_COLLISION_HALF_EXTENT);
     }
 }
 

@@ -12,7 +12,8 @@ pub mod player;
 pub mod ui;
 pub mod world;
 
-pub const TILE_SIZE: f32 = 32.0;
+pub const TILE_SIZE: f32 = 48.0;
+pub const ACTOR_COLLISION_HALF_EXTENT: f32 = TILE_SIZE * 0.36;
 pub const WORLD_WIDTH: i32 = 112;
 pub const WORLD_HEIGHT: i32 = 112;
 

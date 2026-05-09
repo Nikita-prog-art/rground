@@ -50,6 +50,39 @@ impl TileMap {
         self.get(pos).is_some_and(TileKind::is_walkable)
     }
 
+    pub fn is_area_walkable(&self, position: Vec3, half_extent: f32) -> bool {
+        let offsets = [
+            Vec2::new(-half_extent, -half_extent),
+            Vec2::new(-half_extent, half_extent),
+            Vec2::new(half_extent, -half_extent),
+            Vec2::new(half_extent, half_extent),
+        ];
+
+        offsets
+            .into_iter()
+            .all(|offset| self.is_walkable(self.world_to_tile(position + offset.extend(0.0))))
+    }
+
+    pub fn slide_position(&self, position: Vec3, delta: Vec2, half_extent: f32) -> Vec3 {
+        let mut result = position;
+
+        if delta.x != 0.0 {
+            let candidate = result + Vec3::new(delta.x, 0.0, 0.0);
+            if self.is_area_walkable(candidate, half_extent) {
+                result.x = candidate.x;
+            }
+        }
+
+        if delta.y != 0.0 {
+            let candidate = result + Vec3::new(0.0, delta.y, 0.0);
+            if self.is_area_walkable(candidate, half_extent) {
+                result.y = candidate.y;
+            }
+        }
+
+        result
+    }
+
     pub fn tile_to_world(&self, pos: IVec2) -> Vec3 {
         Vec3::new(
             (pos.x as f32 - self.width as f32 * 0.5) * TILE_SIZE + TILE_SIZE * 0.5,
@@ -110,5 +143,22 @@ impl TileMap {
         } else {
             None
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn area_walkability_respects_actor_corners() {
+        let mut map = TileMap::new(3, 3, TileKind::Grass);
+        map.set(IVec2::new(2, 1), TileKind::Stone);
+
+        let center = map.tile_to_world(IVec2::new(1, 1));
+        assert!(map.is_area_walkable(center, TILE_SIZE * 0.36));
+
+        let overlapped = center + Vec3::new(TILE_SIZE * 0.15, 0.0, 0.0);
+        assert!(!map.is_area_walkable(overlapped, TILE_SIZE * 0.36));
     }
 }

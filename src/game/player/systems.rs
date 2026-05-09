@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::game::{
-    TILE_SIZE,
+    ACTOR_COLLISION_HALF_EXTENT, TILE_SIZE,
     actors::components::{Actor, ActorKind, ActorName, Health},
     inventory::model::Inventory,
     items::registry::ItemRegistry,
@@ -69,10 +69,9 @@ pub fn player_movement_system(
     let normalized = direction.normalize();
     facing.0 = dominant_axis(normalized);
 
-    let next = transform.translation + (normalized * PLAYER_SPEED * time.delta_secs()).extend(0.0);
-    if tile_map.is_walkable(tile_map.world_to_tile(next)) {
-        transform.translation = next;
-    }
+    let delta = normalized * PLAYER_SPEED * time.delta_secs();
+    transform.translation =
+        tile_map.slide_position(transform.translation, delta, ACTOR_COLLISION_HALF_EXTENT);
 }
 
 pub fn harvest_front_tile_system(
